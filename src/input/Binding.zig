@@ -845,6 +845,9 @@ pub const Action = union(enum) {
     /// configuration file to customize its behavior.
     toggle_quick_terminal,
 
+    /// Toggles the quick-terminal-autohide behavior at runtime (currently GTK only).
+    toggle_qt_autohide,
+
     /// Show or hide all windows. If all windows become shown, we also ensure
     /// Ghostty becomes focused. When hiding all windows, focus is yielded
     /// to the next application as determined by the OS.
@@ -1337,6 +1340,7 @@ pub const Action = union(enum) {
             .close_all_windows,
             .quit,
             .toggle_quick_terminal,
+            .toggle_qt_autohide,
             .toggle_visibility,
             .check_for_updates,
             .show_gtk_inspector,

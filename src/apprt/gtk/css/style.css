@@ -181,3 +181,10 @@ label.resize-overlay {
   margin: 0;
   padding: 0;
 }
+
+/*
+ * Quick Terminal Autohide Blocked
+ */
+window.qt-autohide-blocked {
+  border: 2px solid rgba(255, 120, 0, 0.8);
+}

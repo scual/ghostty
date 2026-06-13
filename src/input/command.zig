@@ -627,6 +627,12 @@ fn actionCommands(action: Action.Key) []const Command {
             .description = "Toggle the window decorations.",
         }},
 
+        .toggle_qt_autohide => comptime &.{.{
+            .action = .toggle_qt_autohide,
+            .title = "Toggle Quick Terminal Autohide",
+            .description = "Toggle the quick-terminal-autohide behavior at runtime (currently GTK only).",
+        }},
+
         .toggle_window_float_on_top => comptime &.{.{
             .action = .toggle_window_float_on_top,
             .title = "Toggle Float on Top",
