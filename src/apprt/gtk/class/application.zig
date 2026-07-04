@@ -205,6 +205,9 @@ pub const Application = extern struct {
         /// glib source for our signal handler.
         signal_source: ?c_uint = null,
 
+        /// Override for quick-terminal-autohide.
+        qt_autohide_override: ?bool = null,
+
         /// CSS Provider for any styles based on Ghostty configuration values.
         css_provider: *gtk.CssProvider,
 
@@ -760,6 +763,7 @@ pub const Application = extern struct {
             .toggle_maximize => Action.toggleMaximize(target),
             .toggle_fullscreen => Action.toggleFullscreen(target),
             .toggle_quick_terminal => return Action.toggleQuickTerminal(self),
+            .toggle_qt_autohide => return Action.toggleQtAutohide(self),
             .toggle_tab_overview => return Action.toggleTabOverview(target),
             .toggle_window_decorations => return Action.toggleWindowDecorations(target),
             .toggle_command_palette => return Action.toggleCommandPalette(target),
@@ -1903,6 +1907,14 @@ pub const Application = extern struct {
             url,
         ) catch |err| log.warn("unable to open url: {}", .{err});
     }
+
+    pub fn isQtAutohideEnabled(self: *Application, config: *const configpkg.Config) bool {
+        const priv = self.private();
+        if (priv.qt_autohide_override) |override| {
+            return override;
+        }
+        return config.@"quick-terminal-autohide";
+    }
 };
 
 /// All apprt action handlers
@@ -2646,6 +2658,19 @@ const Action = struct {
         }
     }
 
+    pub fn toggleQtAutohide(self: *Application) bool {
+        const priv = self.private();
+        const current_state = self.isQtAutohideEnabled(priv.config.get());
+        priv.qt_autohide_override = !current_state;
+
+        if (getQuickTerminalWindow()) |win| {
+            win.toggleCssClass("qt-autohide-blocked", !priv.qt_autohide_override.?);
+        }
+
+        log.info("Quick Terminal Autohide toggled to: {}", .{!current_state});
+        return true;
+    }
+
     pub fn toggleQuickTerminal(self: *Application) bool {
         // If we already have a quick terminal window, we just toggle the
         // visibility of it.
@@ -2664,6 +2689,7 @@ const Action = struct {
             .@"quick-terminal" = true,
         });
         assert(win.isQuickTerminal());
+        win.toggleCssClass("qt-autohide-blocked", !self.isQtAutohideEnabled(priv.config.get()));
         initAndShowWindow(self, win, null, .none);
         return true;
     }

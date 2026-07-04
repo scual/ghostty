@@ -730,7 +730,7 @@ pub const Window = extern struct {
         action.setEnabled(@intFromBool(has_selection));
     }
 
-    fn toggleCssClass(self: *Self, class: [:0]const u8, value: bool) void {
+    pub fn toggleCssClass(self: *Self, class: [:0]const u8, value: bool) void {
         const widget = self.as(gtk.Widget);
         if (value)
             widget.addCssClass(class.ptr)
@@ -869,7 +869,7 @@ pub const Window = extern struct {
         // Hide quick-terminal if set to autohide
         if (self.isQuickTerminal()) {
             if (self.getConfig()) |cfg| {
-                if (cfg.get().@"quick-terminal-autohide" and
+                if (Application.default().isQtAutohideEnabled(cfg.get()) and
                     self.as(gtk.Window).isActive() == 0 and
                     self.as(gtk.Widget).isVisible() == 1)
                 {

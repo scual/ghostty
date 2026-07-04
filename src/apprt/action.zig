@@ -114,6 +114,9 @@ pub const Action = union(Key) {
     /// Toggle the quick terminal in or out.
     toggle_quick_terminal,
 
+    /// Toggle the quick-terminal-autohide behavior at runtime (currently GTK only).
+    toggle_qt_autohide,
+
     /// Toggle the command palette.
     toggle_command_palette,
 
@@ -360,6 +363,7 @@ pub const Action = union(Key) {
         toggle_tab_overview,
         toggle_window_decorations,
         toggle_quick_terminal,
+        toggle_qt_autohide,
         toggle_command_palette,
         toggle_visibility,
         toggle_background_opacity,
