@@ -38,6 +38,18 @@ pub const CSelection = extern struct {
     }
 };
 
+/// C: GhosttySelectionBuffer
+///
+/// A caller-provided buffer of selections. This follows the same
+/// conventions as GhosttyBuffer: ptr may be NULL with cap 0 to query
+/// the required capacity, and len is set to the entries written on
+/// success or to the required capacity on GHOSTTY_OUT_OF_SPACE.
+pub const CSelectionBuffer = extern struct {
+    ptr: ?[*]CSelection = null,
+    cap: usize = 0,
+    len: usize = 0,
+};
+
 /// C: GhosttyTerminalSelectWordOptions
 pub const SelectWordOptions = extern struct {
     size: usize = @sizeOf(SelectWordOptions),
@@ -253,7 +265,7 @@ fn selectionFormatter(
     opts: FormatOptions,
 ) error{ InvalidValue, NoValue }!formatterpkg.TerminalFormatter {
     if (opts.size < @sizeOf(FormatOptions)) return error.InvalidValue;
-    _ = std.meta.intToEnum(Format, @intFromEnum(opts.emit)) catch
+    _ = std.enums.fromInt(Format, @intFromEnum(opts.emit)) orelse
         return error.InvalidValue;
 
     const sel = if (opts.selection) |sel|
@@ -308,7 +320,7 @@ pub fn adjust(
     adjustment: Selection.Adjustment,
 ) callconv(lib.calling_conv) Result {
     if (comptime std.debug.runtime_safety) {
-        _ = std.meta.intToEnum(Selection.Adjustment, @intFromEnum(adjustment)) catch {
+        _ = std.enums.fromInt(Selection.Adjustment, @intFromEnum(adjustment)) orelse {
             log.warn("terminal_selection_adjust invalid adjustment value={d}", .{@intFromEnum(adjustment)});
             return .invalid_value;
         };
@@ -343,7 +355,7 @@ pub fn ordered(
     out_selection: ?*CSelection,
 ) callconv(lib.calling_conv) Result {
     if (comptime std.debug.runtime_safety) {
-        _ = std.meta.intToEnum(Selection.Order, @intFromEnum(desired)) catch {
+        _ = std.enums.fromInt(Selection.Order, @intFromEnum(desired)) orelse {
             log.warn("terminal_selection_ordered invalid desired value={d}", .{@intFromEnum(desired)});
             return .invalid_value;
         };
@@ -397,7 +409,8 @@ test "selection_format_alloc uses active selection" {
     try testing.expectEqual(Result.success, terminal_c.new(
         &lib.alloc.test_allocator,
         &t,
-        .{ .cols = 80, .rows = 24, .max_scrollback = 10_000 },
+        80,
+        24,
     ));
     defer terminal_c.free(t);
 
@@ -457,7 +470,8 @@ test "selection_format_buf uses provided selection" {
     try testing.expectEqual(Result.success, terminal_c.new(
         &lib.alloc.test_allocator,
         &t,
-        .{ .cols = 80, .rows = 24, .max_scrollback = 10_000 },
+        80,
+        24,
     ));
     defer terminal_c.free(t);
 
@@ -513,7 +527,8 @@ test "selection_format_alloc returns no_value without active selection" {
     try testing.expectEqual(Result.success, terminal_c.new(
         &lib.alloc.test_allocator,
         &t,
-        .{ .cols = 80, .rows = 24, .max_scrollback = 10_000 },
+        80,
+        24,
     ));
     defer terminal_c.free(t);
 
