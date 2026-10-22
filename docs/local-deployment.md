@@ -4,17 +4,19 @@ This guide covers building, installing, and configuring Ghostty locally on Fedor
 
 ## 1. Prerequisites
 
-Ghostty requires Zig version 0.15.2 and several system development libraries.
+Ghostty requires Zig version 0.16.0 and several system development libraries.
 
 ### Installing Zig via ZVM
+
 It's highly recommended to manage Zig versions using Zig Version Manager (zvm) to avoid clashing with your system's default version:
 
 ```bash
-zvm install 0.15.2
-zvm use 0.15.2
+zvm install 0.16.0
+zvm use 0.16.0
 ```
 
 ### Installing C Dependencies
+
 Install the required GTK4 and shell dependencies:
 
 ```bash
@@ -43,7 +45,7 @@ sudo dnf remove ghostty
 
 ### Fixing Application Launcher Issues (KDE / GNOME)
 
-Sometimes, the local `.desktop` file installed by the build process tries to use D-Bus activation. This can fail with a *"The name is not activatable"* error if the local D-Bus daemon hasn't synced the newly installed `com.mitchellh.ghostty.service` user service.
+Sometimes, the local `.desktop` file installed by the build process tries to use D-Bus activation. This can fail with a _"The name is not activatable"_ error if the local D-Bus daemon hasn't synced the newly installed `com.mitchellh.ghostty.service` user service.
 
 To fix this reliably for local builds:
 
@@ -54,7 +56,8 @@ To fix this reliably for local builds:
 ```bash
 update-desktop-database ~/.local/share/applications/ && kbuildsycoca6
 ```
-*(Note: Use `kbuildsycoca5` instead if you are on an older KDE Plasma 5 setup).*
+
+_(Note: Use `kbuildsycoca5` instead if you are on an older KDE Plasma 5 setup)._
 
 Ghostty will now be fully integrated into your `Alt + Space` desktop launcher and seamlessly inherit your `~/.config/ghostty/config` configurations!
 
@@ -66,9 +69,11 @@ To restore the background blur on KDE Wayland, you have two options:
 
 **Option A: Force XWayland (Easiest)**
 Force Ghostty to run under X11 by editing your `.desktop` file:
+
 ```ini
 Exec=env GDK_BACKEND=x11 /home/scual/.local/bin/ghostty --gtk-single-instance=true
 ```
+
 Under X11, Ghostty uses a different mechanism (`_KDE_NET_WM_BLUR_BEHIND_REGION`) which is fully supported by KDE.
 
 **Option B: Revert the Wayland Protocol Change (Native Wayland)**
@@ -81,4 +86,5 @@ git diff 9e2e99c55fb5f2c0709938eb590b62112f3d7446^..9e2e99c55fb5f2c0709938eb590b
 # Apply the patch in reverse
 git apply -R --3way /tmp/kde-blur.patch
 ```
-*(Note: You will encounter minor merge conflicts in `src/apprt/gtk/winproto/wayland.zig`. Manually resolve them by keeping the restored `blur_token` logic, then rebuild Ghostty).*
+
+_(Note: You will encounter minor merge conflicts in `src/apprt/gtk/winproto/wayland.zig`. Manually resolve them by keeping the restored `blur_token` logic, then rebuild Ghostty)._
